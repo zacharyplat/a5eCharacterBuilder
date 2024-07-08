@@ -1,9 +1,9 @@
-import { Button } from "@material-tailwind/react"
+import { DataEditor } from "./features/dataEditor/DataEditor"
 
 const App = () => {
   return (
     <div className="App">
-      <Button color="blue">Button</Button>
+      <DataEditor />
     </div>
   )
 }
