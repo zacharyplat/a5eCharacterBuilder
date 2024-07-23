@@ -34,9 +34,10 @@ export const DataEditor = () => {
 
 const KeyValueEditor = () => {
   const dispatch = useAppDispatch();
-  const [localCatagory, setLocalCatagory] = useState<string | undefined>(
-    undefined,
-  );
+  const globalCat = useAppSelector(state => state.dataEditor.selected);
+
+  const [title, setTitle] = useState<string>("");
+  const [textBox, setTextBox] = useState<string>("");
 
   const enumWithNumbers = Object.keys(Catagories) as Array<
     keyof typeof Catagories
@@ -46,9 +47,10 @@ const KeyValueEditor = () => {
     str => str[0] + str.slice(1).toLowerCase(),
   );
   const handleCatagoryChange = (evt: string | undefined) => {
-    setLocalCatagory(evt);
     dispatch(selectedCatagory(evt));
   };
+
+  const selectedHelper = () => globalCat[0].toUpperCase() + globalCat.slice(1);
 
   return (
     <Card color="transparent" shadow={false}>
@@ -60,7 +62,7 @@ const KeyValueEditor = () => {
       </Typography>
       <div className="w-72">
         <Select
-          value={localCatagory}
+          value={selectedHelper()}
           label="Catagory"
           onChange={handleCatagoryChange}
         >
@@ -80,10 +82,16 @@ const KeyValueEditor = () => {
             size="lg"
             placeholder="Title"
             className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
+            value={title}
+            onChange={evt => setTitle(evt.target.value)}
           />
-          <Textarea label="Text to import" />
+          <Textarea
+            label="Text to import"
+            value={textBox}
+            onChange={evt => setTextBox(evt.target.value)}
+          />
         </div>
-        <Button className="mt-6" fullWidth>
+        <Button className="mt-6" fullWidth onClick={console.log}>
           Add new details
         </Button>
       </form>
@@ -93,5 +101,6 @@ const KeyValueEditor = () => {
 
 const JsonViewer = () => {
   const json = useAppSelector(selectJson);
-  return <JsonEditor data={json} />;
+  const root = useAppSelector(state => state.dataEditor.selected);
+  return <JsonEditor data={json} rootName={root} />;
 };
