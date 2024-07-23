@@ -14,8 +14,11 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals"],
+    "paths": {
+      "react": ["./node_modules/@types/react"]
+    }
   },
   "references": [{ "path": "./tsconfig.node.json" }],
-  "include": ["**/*.tsx"]
+  "include": ["**/*"]
 }
