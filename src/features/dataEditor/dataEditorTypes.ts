@@ -22,15 +22,16 @@ export type stats = {
 export type Attributes = {
   title: string;
   description: string;
-  granted?: Affix[];
 };
+export type Catagory = { [key: string]: Attributes[] };
+
 export type CatagoriesObject = {
-  heritage: { [key: string]: Attributes };
-  culture: { [key: string]: Attributes };
-  background: { [key: string]: Attributes };
-  destiny: { [key: string]: Attributes };
-  class: { [key: string]: Attributes };
-  abilities: { [key: string]: Attributes };
-  equipment: { [key: string]: Attributes };
-  spells: { [key: string]: Attributes };
+  heritage: Catagory;
+  culture: Catagory;
+  background: Catagory;
+  destiny: Catagory;
+  class: Catagory;
+  abilities: Catagory;
+  equipment: Catagory;
+  spells: Catagory;
 };

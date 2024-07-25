@@ -1,6 +1,7 @@
 import {
   Button,
   Card,
+  CardBody,
   Input,
   Option,
   Select,
@@ -10,7 +11,15 @@ import {
 import { JsonEditor } from "json-edit-react";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { selectedCatagory, selectJson } from "./dataEditorSlice";
+import {
+  add,
+  currAttrSelected,
+  currentAttribute,
+  selected,
+  selectedCatagory,
+  selectJson,
+  updateCurrentAttribute,
+} from "./dataEditorSlice";
 
 enum Catagories {
   HERITAGE,
@@ -23,6 +32,10 @@ enum Catagories {
   SPELLS,
 }
 
+const toTitleCase = (str: string) => {
+  return str && str[0].toUpperCase() + str.slice(1).toLowerCase();
+};
+
 export const DataEditor = () => {
   return (
     <div className="grid gap-8 grid-cols-1 lg:grid-cols-2">
@@ -32,25 +45,23 @@ export const DataEditor = () => {
   );
 };
 
-const KeyValueEditor = () => {
-  const dispatch = useAppDispatch();
-  const globalCat = useAppSelector(state => state.dataEditor.selected);
-
-  const [title, setTitle] = useState<string>("");
-  const [textBox, setTextBox] = useState<string>("");
-
+const getCatagoryStrings = () => {
   const enumWithNumbers = Object.keys(Catagories) as Array<
     keyof typeof Catagories
   >;
   const allCapsStrings = enumWithNumbers.filter(val => isNaN(Number(val)));
-  const catagoryStrings = allCapsStrings.map(
-    str => str[0] + str.slice(1).toLowerCase(),
-  );
+  return allCapsStrings.map(toTitleCase);
+};
+
+const KeyValueEditor = () => {
+  const dispatch = useAppDispatch();
+  const selected = useAppSelector(state => state.dataEditor.selected);
+
+  const catagoryStrings = getCatagoryStrings();
+
   const handleCatagoryChange = (evt: string | undefined) => {
     dispatch(selectedCatagory(evt));
   };
-
-  const selectedHelper = () => globalCat[0].toUpperCase() + globalCat.slice(1);
 
   return (
     <Card color="transparent" shadow={false}>
@@ -62,7 +73,7 @@ const KeyValueEditor = () => {
       </Typography>
       <div className="w-72">
         <Select
-          value={selectedHelper()}
+          value={toTitleCase(selected)}
           label="Catagory"
           onChange={handleCatagoryChange}
         >
@@ -73,6 +84,39 @@ const KeyValueEditor = () => {
           ))}
         </Select>
       </div>
+      <ValueParser />
+    </Card>
+  );
+};
+
+type ParserProps = {
+  name: string;
+  description: string;
+};
+const ValueParser = () => {
+  const dispatch = useAppDispatch();
+  const selectedCatagory = useAppSelector(selected);
+  const currAttr = useAppSelector(currentAttribute);
+  const currentAttributeSelected = useAppSelector(currAttrSelected);
+  const [textBox, setTextBox] = useState<string>("");
+  const [parsed, setParsed] = useState<any>([]);
+
+  const handleParsing = () => {
+    const attribute = currAttr?.toLowerCase();
+    const lines = textBox.split("\n\n");
+    const affixes = lines.map(val => {
+      const sentences = val.trim().split(".");
+      const name = sentences.shift() || "";
+      const description = sentences.join(".");
+      return { name, description };
+    });
+    setParsed(affixes);
+    dispatch(add({ [selectedCatagory]: { [attribute]: affixes } }));
+  };
+  console.log(currentAttributeSelected);
+
+  return (
+    <>
       <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96">
         <div className="mb-1 flex flex-col gap-6">
           <Typography variant="h6" color="blue-gray" className="-mb-3">
@@ -82,8 +126,8 @@ const KeyValueEditor = () => {
             size="lg"
             placeholder="Title"
             className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-            value={title}
-            onChange={evt => setTitle(evt.target.value)}
+            value={toTitleCase(currAttr)}
+            onChange={evt => dispatch(updateCurrentAttribute(evt.target.value))}
           />
           <Textarea
             label="Text to import"
@@ -91,16 +135,36 @@ const KeyValueEditor = () => {
             onChange={evt => setTextBox(evt.target.value)}
           />
         </div>
-        <Button className="mt-6" fullWidth onClick={console.log}>
+        <Button className="mt-6" fullWidth onClick={handleParsing}>
           Add new details
         </Button>
       </form>
+      {parsed.map((val: ParserProps) => (
+        <ParsedItems
+          key={val.name}
+          name={val.name}
+          description={val.description}
+        />
+      ))}
+    </>
+  );
+};
+const ParsedItems = (props: ParserProps) => {
+  const { name, description } = props;
+  return (
+    <Card className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96">
+      <CardBody>
+        <Typography variant="h5" color="blue-gray" className="mb-2">
+          {name}
+        </Typography>
+        <Typography variant="small">{description}</Typography>
+      </CardBody>
     </Card>
   );
 };
 
 const JsonViewer = () => {
   const json = useAppSelector(selectJson);
-  const root = useAppSelector(state => state.dataEditor.selected);
+  const root = useAppSelector(selected);
   return <JsonEditor data={json} rootName={root} />;
 };
