@@ -13,12 +13,12 @@ import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   add,
-  currAttrSelected,
-  currentAttribute,
+  currAffixSelected,
+  currentAffix,
   selected,
   selectedCatagory,
   selectJson,
-  updateCurrentAttribute,
+  updateCurrentAffix,
 } from "./dataEditorSlice";
 
 enum Catagories {
@@ -89,20 +89,15 @@ const KeyValueEditor = () => {
   );
 };
 
-type ParserProps = {
-  name: string;
-  description: string;
-};
 const ValueParser = () => {
   const dispatch = useAppDispatch();
   const selectedCatagory = useAppSelector(selected);
-  const currAttr = useAppSelector(currentAttribute);
-  const currentAttributeSelected = useAppSelector(currAttrSelected);
+  const currAffix = useAppSelector(currentAffix);
+  const currentAffixSelected = useAppSelector(currAffixSelected);
   const [textBox, setTextBox] = useState<string>("");
-  const [parsed, setParsed] = useState<any>([]);
 
   const handleParsing = () => {
-    const attribute = currAttr?.toLowerCase();
+    const affix = currAffix?.toLowerCase();
     const lines = textBox.split("\n\n");
     const affixes = lines.map(val => {
       const sentences = val.trim().split(".");
@@ -110,10 +105,9 @@ const ValueParser = () => {
       const description = sentences.join(".");
       return { name, description };
     });
-    setParsed(affixes);
-    dispatch(add({ [selectedCatagory]: { [attribute]: affixes } }));
+    dispatch(add({ [selectedCatagory]: { [affix]: affixes } }));
   };
-  console.log(currentAttributeSelected);
+  console.log(currentAffixSelected);
 
   return (
     <>
@@ -126,8 +120,8 @@ const ValueParser = () => {
             size="lg"
             placeholder="Title"
             className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-            value={toTitleCase(currAttr)}
-            onChange={evt => dispatch(updateCurrentAttribute(evt.target.value))}
+            value={toTitleCase(currAffix)}
+            onChange={evt => dispatch(updateCurrentAffix(evt.target.value))}
           />
           <Textarea
             label="Text to import"
@@ -139,7 +133,7 @@ const ValueParser = () => {
           Add new details
         </Button>
       </form>
-      {parsed.map((val: ParserProps) => (
+      {currentAffixSelected?.map(val => (
         <ParsedItems
           key={val.name}
           name={val.name}
@@ -149,7 +143,7 @@ const ValueParser = () => {
     </>
   );
 };
-const ParsedItems = (props: ParserProps) => {
+const ParsedItems = props => {
   const { name, description } = props;
   return (
     <Card className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96">

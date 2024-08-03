@@ -5,7 +5,7 @@ type Affix = {
   choices?: string[];
 };
 
-export type stats = {
+type stats = {
   age?: Affix;
   speed?: Affix;
   size?: Affix;
@@ -19,11 +19,7 @@ export type stats = {
   hp?: number;
   ac?: number;
 };
-export type Attributes = {
-  title: string;
-  description: string;
-};
-export type Catagory = { [key: string]: Attributes[] };
+export type Catagory = { [key: string]: Affix[] };
 
 export type CatagoriesObject = {
   heritage: Catagory;
