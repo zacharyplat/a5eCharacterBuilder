@@ -2,6 +2,7 @@ import {
   Button,
   Card,
   CardBody,
+  CardFooter,
   Input,
   Option,
   Select,
@@ -9,12 +10,14 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { JsonEditor } from "json-edit-react";
+import type { MouseEventHandler } from "react";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
-  add,
+  addToAffix,
   currAffixSelected,
   currentAffix,
+  deleteAffixAtIndex,
   selected,
   selectedCatagory,
   selectJson,
@@ -91,13 +94,12 @@ const KeyValueEditor = () => {
 
 const ValueParser = () => {
   const dispatch = useAppDispatch();
-  const selectedCatagory = useAppSelector(selected);
+  //const selectedCatagory = useAppSelector(selected);
   const currAffix = useAppSelector(currentAffix);
   const currentAffixSelected = useAppSelector(currAffixSelected);
   const [textBox, setTextBox] = useState<string>("");
 
   const handleParsing = () => {
-    const affix = currAffix?.toLowerCase();
     const lines = textBox.split("\n\n");
     const affixes = lines.map(val => {
       const sentences = val.trim().split(".");
@@ -105,7 +107,10 @@ const ValueParser = () => {
       const description = sentences.join(".");
       return { name, description };
     });
-    dispatch(add({ [selectedCatagory]: { [affix]: affixes } }));
+    dispatch(addToAffix(affixes));
+  };
+  const handleDelete = (index: number) => {
+    dispatch(deleteAffixAtIndex(index));
   };
   console.log(currentAffixSelected);
 
@@ -133,26 +138,49 @@ const ValueParser = () => {
           Add new details
         </Button>
       </form>
-      {currentAffixSelected?.map(val => (
+      {currentAffixSelected?.map((val, index) => (
         <ParsedItems
           key={val.name}
           name={val.name}
           description={val.description}
+          deleteItem={() => handleDelete(index)}
         />
       ))}
     </>
   );
 };
-const ParsedItems = props => {
-  const { name, description } = props;
+type ParsedItemsProps = {
+  name: string;
+  description: string;
+  deleteItem: () => void;
+};
+const ParsedItems = (props: ParsedItemsProps) => {
+  const { name, description, deleteItem } = props;
+
+  const [isDisabled, setIsDisabled] = useState<boolean>(true);
+  const handleMouseUp: MouseEventHandler<HTMLDivElement> = event => {
+    setIsDisabled(!(window.getSelection()?.type === "Range"));
+  };
   return (
-    <Card className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96">
+    <Card
+      onMouseUp={handleMouseUp}
+      className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96"
+    >
       <CardBody>
         <Typography variant="h5" color="blue-gray" className="mb-2">
           {name}
         </Typography>
         <Typography variant="small">{description}</Typography>
       </CardBody>
+      <span
+        onClick={deleteItem}
+        className="absolute rounded-full py-1 px-1 text-xs font-medium content-[''] leading-none grid place-items-center top-[4%] right-[2%] translate-x-2/4 -translate-y-2/4 bg-red-500 text-white min-w-[24px] min-h-[24px]"
+      >
+        -
+      </span>
+      <CardFooter className="pt-0">
+        <Dialog cta={""} />
+      </CardFooter>
     </Card>
   );
 };
@@ -160,5 +188,7 @@ const ParsedItems = props => {
 const JsonViewer = () => {
   const json = useAppSelector(selectJson);
   const root = useAppSelector(selected);
-  return <JsonEditor data={json} rootName={root} />;
+  return (
+    <JsonEditor data={json} rootName={root} rootFontSize={14} collapse={2} />
+  );
 };

@@ -28,8 +28,21 @@ export const dataEditorSlice = createSlice({
   initialState,
   reducers: {
     add: (state, action) => {
-      console.log("Adding", action.payload);
+      if (state.selected === "all" || !state.data[state.selected]) return;
       state = { ...state, data: { ...state.data, ...action.payload } };
+      return state;
+    },
+    addToAffix: (state, action) => {
+      action.payload.forEach((val: { name: string; description: string }) => {
+        if (state.selected === "all" || !state.data[state.selected]) return;
+        state.data[state.selected][state.currentAffix].push(val);
+      });
+      return state;
+    },
+    deleteAffixAtIndex: (state, action) => {
+      console.log("deleting", action.payload);
+      if (state.selected === "all" || !state.data[state.selected]) return;
+      state.data[state.selected][state.currentAffix].splice(action.payload, 1);
       return state;
     },
 
@@ -58,16 +71,18 @@ export const dataEditorSlice = createSlice({
 
     currAffixSelected: obj => {
       const { selected, currentAffix, data } = obj;
-      console.log(
-        `Selected: ${selected}, Current: ${currentAffix}, Data: ${data}`,
-      );
       return selected !== "all" ? data[selected][currentAffix] : [];
     },
   },
 });
 
-export const { add, selectedCatagory, updateCurrentAffix } =
-  dataEditorSlice.actions;
+export const {
+  add,
+  addToAffix,
+  deleteAffixAtIndex,
+  selectedCatagory,
+  updateCurrentAffix,
+} = dataEditorSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 //export const selectJson = (state: RootState) => state.dataEditor.data

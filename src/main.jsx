@@ -12,6 +12,7 @@ if (container) {
   const root = createRoot(container);
 
   root.render(
+    // eslint-disable-next-line react/jsx-no-undef
     <React.StrictMode>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
