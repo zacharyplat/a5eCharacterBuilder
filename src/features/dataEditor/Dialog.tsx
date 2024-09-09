@@ -10,7 +10,7 @@ import React from "react";
 
 type DialogButton = {
   text: string;
-  color: color;
+  color?: color;
   onClick: () => void;
 };
 
@@ -22,7 +22,7 @@ type DialogProps = {
   body: string;
 };
 
-export function DialogDefault(props: DialogProps) {
+export function SimpleDialog(props: DialogProps) {
   const { cta, buttonLeft, buttonRight, header, body } = props;
   const [open, setOpen] = React.useState(false);
 
@@ -39,16 +39,16 @@ export function DialogDefault(props: DialogProps) {
         <DialogFooter>
           <Button
             variant="text"
-            color={buttonLeft.color ? buttonLeft.color : ("red" as color)}
-            onClick={handleOpen}
+            color={buttonLeft?.color ? buttonLeft.color : ("red" as color)}
+            onClick={buttonLeft.onClick}
             className="mr-1"
           >
             <span>{buttonLeft.text}</span>
           </Button>
           <Button
             variant="gradient"
-            color={buttonRight.color ? buttonRight.color : ("green" as color)}
-            onClick={handleOpen}
+            color={buttonRight?.color ? buttonRight.color : ("green" as color)}
+            onClick={buttonRight.onClick}
           >
             <span>{buttonRight.text}</span>
           </Button>

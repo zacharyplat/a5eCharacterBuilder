@@ -33,16 +33,30 @@ export const dataEditorSlice = createSlice({
       return state;
     },
     addToAffix: (state, action) => {
+      // payload is an array, may be only one element
       action.payload.forEach((val: { name: string; description: string }) => {
+        // A little bit weird but typescript is not happy if we pull this if statement out
+        // doesn't see that we are guarded against the wrong type
         if (state.selected === "all" || !state.data[state.selected]) return;
+        !state.data[state.selected][state.currentAffix] &&
+          (state.data[state.selected][state.currentAffix] = []);
         state.data[state.selected][state.currentAffix].push(val);
       });
       return state;
     },
     deleteAffixAtIndex: (state, action) => {
-      console.log("deleting", action.payload);
       if (state.selected === "all" || !state.data[state.selected]) return;
       state.data[state.selected][state.currentAffix].splice(action.payload, 1);
+      return state;
+    },
+
+    annotateAffix: (state, action) => {
+      const { data, selected, currentAffix } = state;
+      const { index, val } = action.payload;
+      if (selected === "all" || !data[selected]) return;
+      let affix = data[selected][currentAffix][index];
+      data[selected][currentAffix][index] = { ...affix, ...val };
+      console.log(`state: ${state}`);
       return state;
     },
 
@@ -80,6 +94,7 @@ export const {
   add,
   addToAffix,
   deleteAffixAtIndex,
+  annotateAffix,
   selectedCatagory,
   updateCurrentAffix,
 } = dataEditorSlice.actions;

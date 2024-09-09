@@ -1,4 +1,4 @@
-type Affix = {
+export type Affix = {
   name: string;
   description: string;
   granted?: string[];

@@ -9,12 +9,13 @@ import {
   Textarea,
   Typography,
 } from "@material-tailwind/react";
+import type { color } from "@material-tailwind/react/types/components/button";
 import { JsonEditor } from "json-edit-react";
-import type { MouseEventHandler } from "react";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   addToAffix,
+  annotateAffix,
   currAffixSelected,
   currentAffix,
   deleteAffixAtIndex,
@@ -23,6 +24,8 @@ import {
   selectJson,
   updateCurrentAffix,
 } from "./dataEditorSlice";
+import type { Affix } from "./dataEditorTypes";
+import { SimpleDialog } from "./Dialog";
 
 enum Catagories {
   HERITAGE,
@@ -92,6 +95,7 @@ const KeyValueEditor = () => {
   );
 };
 
+type affixAnnotations = Pick<Affix, "granted" | "choices">;
 const ValueParser = () => {
   const dispatch = useAppDispatch();
   //const selectedCatagory = useAppSelector(selected);
@@ -112,7 +116,6 @@ const ValueParser = () => {
   const handleDelete = (index: number) => {
     dispatch(deleteAffixAtIndex(index));
   };
-  console.log(currentAffixSelected);
 
   return (
     <>
@@ -144,28 +147,36 @@ const ValueParser = () => {
           name={val.name}
           description={val.description}
           deleteItem={() => handleDelete(index)}
+          annotateAffix={(val: affixAnnotations) =>
+            dispatch(annotateAffix({ index, val }))
+          }
         />
       ))}
     </>
   );
 };
+
 type ParsedItemsProps = {
   name: string;
   description: string;
   deleteItem: () => void;
+  annotateAffix: (val: affixAnnotations) => void;
 };
 const ParsedItems = (props: ParsedItemsProps) => {
-  const { name, description, deleteItem } = props;
+  const { name, description, deleteItem, annotateAffix } = props;
 
-  const [isDisabled, setIsDisabled] = useState<boolean>(true);
-  const handleMouseUp: MouseEventHandler<HTMLDivElement> = event => {
-    setIsDisabled(!(window.getSelection()?.type === "Range"));
+  const buttonLeft = {
+    text: "Grant",
+    color: "blue" as color,
+    onClick: () => annotateAffix({ granted: ["window.getSelection()"] }),
+  };
+
+  const buttonRight = {
+    text: "Choice",
+    onClick: () => annotateAffix({ choices: ["window.getSelection()"] }),
   };
   return (
-    <Card
-      onMouseUp={handleMouseUp}
-      className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96"
-    >
+    <Card className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96">
       <CardBody>
         <Typography variant="h5" color="blue-gray" className="mb-2">
           {name}
@@ -179,7 +190,13 @@ const ParsedItems = (props: ParsedItemsProps) => {
         -
       </span>
       <CardFooter className="pt-0">
-        <Dialog cta={""} />
+        <SimpleDialog
+          cta={"Annotate"}
+          body={description}
+          header={name}
+          buttonLeft={buttonLeft}
+          buttonRight={buttonRight}
+        />
       </CardFooter>
     </Card>
   );
