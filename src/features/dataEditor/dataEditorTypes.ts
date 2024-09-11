@@ -1,8 +1,8 @@
 export type Affix = {
   name: string;
   description: string;
-  granted?: string[];
-  choices?: string[];
+  granted?: [number, number][];
+  choices?: [number, number][];
 };
 
 type stats = {
