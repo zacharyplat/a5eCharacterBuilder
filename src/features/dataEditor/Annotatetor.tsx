@@ -1,15 +1,15 @@
 import type { color } from "@material-tailwind/react/types/components/button";
-import type { Affix } from "./dataEditorTypes";
+import type { affixAnnotations } from "./DataEditor";
+import type { Affix, anotation } from "./dataEditorTypes";
 import { SimpleDialog } from "./Dialog";
+import { Highlighter } from "./Highlighter";
 
 type ParsedItemsProps = {
   affix: Affix;
-  deleteItem: () => void;
   annotateAffix: (val: affixAnnotations) => void;
 };
-type anotation = [number, number];
-export const ParsedItems = (props: ParsedItemsProps) => {
-  const { affix, deleteItem, annotateAffix } = props;
+export const Annotatetor = (props: ParsedItemsProps) => {
+  const { affix, annotateAffix } = props;
   const { name, description, granted, choices } = affix;
 
   const tryToAnnotate = (key: "granted" | "choices") => {
@@ -37,6 +37,7 @@ export const ParsedItems = (props: ParsedItemsProps) => {
     return [start, end];
   };
   const mergeIfOverlap = (existing: anotation[]) => {
+    // eslint-disable-next-line no-debugger
     const sorted = existing.sort((a, b) => a[0] - b[0]);
     const merged = [sorted[0]];
     sorted.forEach(val => {
@@ -61,12 +62,17 @@ export const ParsedItems = (props: ParsedItemsProps) => {
     onClick: () => tryToAnnotate("choices"),
   };
   return (
-    <SimpleDialog
-      cta={"Annotate"}
-      body={description}
-      header={name}
-      buttonLeft={buttonLeft}
-      buttonRight={buttonRight}
-    />
+    <>
+      <SimpleDialog
+        cta={"Annotate"}
+        header={name}
+        buttonLeft={buttonLeft}
+        buttonRight={buttonRight}
+      >
+        <Highlighter text={description} indices={granted} />
+      </SimpleDialog>
+
+      <Highlighter text={description} indices={granted} />
+    </>
   );
 };

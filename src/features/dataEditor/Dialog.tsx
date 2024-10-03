@@ -19,12 +19,14 @@ type DialogProps = {
   buttonLeft: DialogButton;
   buttonRight: DialogButton;
   header: string;
-  body: string;
+  body?: string;
+  children?: React.ReactNode;
 };
 
 export function SimpleDialog(props: DialogProps) {
-  const { cta, buttonLeft, buttonRight, header, body } = props;
+  const { cta, buttonLeft, buttonRight, header, body, children } = props;
   const [open, setOpen] = React.useState(false);
+  const mainText = children ? children : body;
 
   const handleOpen = () => setOpen(!open);
 
@@ -35,7 +37,7 @@ export function SimpleDialog(props: DialogProps) {
       </Button>
       <Dialog open={open} handler={handleOpen}>
         <DialogHeader>{header}</DialogHeader>
-        <DialogBody>{body}</DialogBody>
+        <DialogBody>{mainText}</DialogBody>
         <DialogFooter>
           <Button
             variant="text"

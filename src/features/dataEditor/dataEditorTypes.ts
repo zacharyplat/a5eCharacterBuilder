@@ -1,8 +1,10 @@
+export type anotation = [number, number];
+
 export type Affix = {
   name: string;
   description: string;
-  granted?: [number, number][];
-  choices?: [number, number][];
+  granted?: anotation[];
+  choices?: anotation[];
 };
 
 type stats = {
