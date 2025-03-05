@@ -25,7 +25,13 @@ export const Annotatetor = (props: ParsedItemsProps) => {
       annotateAffix({ [key]: [indecies] });
     } else {
       const toCheck = existing.concat([indecies]);
-      const annotations = mergeIfOverlap(toCheck);
+      let annotations: anotation[] = [];
+      try {
+        annotations = mergeIfOverlap(toCheck);
+      } catch (error) {
+        console.log(`error: ${error}`);
+      }
+      //const annotations = mergeIfOverlap(toCheck);
       console.log(`annotations: ${annotations}`);
       annotateAffix({ [key]: annotations });
     }
@@ -37,15 +43,23 @@ export const Annotatetor = (props: ParsedItemsProps) => {
     return [start, end];
   };
   const mergeIfOverlap = (existing: anotation[]) => {
-    // eslint-disable-next-line no-debugger
+    if (existing.length === 1) return existing;
+
     const sorted = existing.sort((a, b) => a[0] - b[0]);
-    const merged = [sorted[0]];
-    sorted.forEach(val => {
-      const index = merged.length - 1;
-      if (merged[index][1] >= val[0]) {
-        merged[index][1] = val[1];
+    let merged = [sorted[0]];
+
+    sorted.forEach(value => {
+      const i = merged.length - 1;
+      console.log(
+        `sorted: ${sorted}\nmerged: ${merged}\nvalue: ${value}\ni: ${i}`,
+      );
+      if (merged?.[i]?.[1] === undefined) return;
+      const [start, end] = value;
+      if (merged[i][1] > start) {
+        const newEnd = Math.max(end, merged[i][1]);
+        merged[i] = [merged[i][0], newEnd];
       } else {
-        merged.push(val);
+        merged.push(value);
       }
     });
     return merged;
@@ -69,10 +83,17 @@ export const Annotatetor = (props: ParsedItemsProps) => {
         buttonLeft={buttonLeft}
         buttonRight={buttonRight}
       >
-        <Highlighter text={description} indices={granted} />
+        <div>
+          <Highlighter text={description} />
+        </div>
+        <div className="select-none">
+          <Highlighter
+            key={"this is new"}
+            text={description}
+            indices={granted}
+          />
+        </div>
       </SimpleDialog>
-
-      <Highlighter text={description} indices={granted} />
     </>
   );
 };
